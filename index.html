@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pixel Tic-Tac-Toe</title>
+<style>
+body { background: #000; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; image-rendering: pixelated; }
+canvas { border: 4px solid #555; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<canvas id="game" width="300" height="300"></canvas>
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const size = 100;
+let board = Array(9).fill(null);
+let turn = 'X';
+let winner = null;
+
+function draw() {
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0,0,300,300);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 4;
+  for (let i = 1; i < 3; i++) {
+    ctx.beginPath(); ctx.moveTo(i*size, 0); ctx.lineTo(i*size, 300); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i*size); ctx.lineTo(300, i*size); ctx.stroke();
+  }
+  board.forEach((cell, i) => {
+    if (!cell) return;
+    const x = (i % 3) * size + 50;
+    const y = Math.floor(i / 3) * size + 50;
+    ctx.fillStyle = cell === 'X' ? '#0f0' : '#f00';
+    ctx.font = '60px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(cell, x, y);
+  });
+  if (winner) {
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0,0,300,300);
+    ctx.fillStyle = '#fff';
+    ctx.font = '30px monospace';
+    ctx.fillText(winner === 'draw' ? 'Draw!' : winner + ' wins!', 150, 150);
+  }
+}
+
+function checkWin() {
+  const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for (let line of lines) {
+    const [a,b,c] = line;
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
+  }
+  if (board.every(c => c)) return 'draw';
+  return null;
+}
+
+canvas.addEventListener('click', e => {
+  if (winner) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.floor((e.clientX - rect.left) / size);
+  const y = Math.floor((e.clientY - rect.top) / size);
+  const i = y * 3 + x;
+  if (board[i]) return;
+  board[i] = turn;
+  turn = turn === 'X' ? 'O' : 'X';
+  winner = checkWin();
+  draw();
+});
+
+draw();
+</script>
+</body>
+</html>
